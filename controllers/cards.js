@@ -27,10 +27,14 @@ module.exports.createCard = (req, res) => {
 module.exports.deleteCard = (req, res) => {
   const id = req.params.cardId;
   Card.findByIdAndRemove(id)
+    .orFail(() => IncorrectDate)
     .then((card) => res.send({ message: `${card} - успешно удалена` }))
     .catch((err) => {
-      if (err.name === 'CastError') {
+      if (err.name === 'ValidationError') {
         return res.status(NotFound.statusCode).send({ message: `Ошибка: ${NotFound.message}` });
+      }
+      if (err.name === 'CastError') {
+        return res.status(IncorrectDate.statusCode).send({ message: `Ошибка: ${IncorrectDate.message}` });
       }
       res.status(500).send({ message: `Произошла ошибка ${err}` });
     });
