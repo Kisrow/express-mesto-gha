@@ -2,28 +2,27 @@ const User = require('../models/user');
 const { IncorrectDateError } = require('../erorrs/incorrect-date');
 const { NotFoundError } = require('../erorrs/not-found');
 
-const IncorrectDate = new IncorrectDateError('Некорректные данные');
-const NotFound = new NotFoundError('отсутствует');
-
 module.exports.getUsers = (req, res) => {
   User.find({})
     .then((users) => res.send(users))
-    .catch((err) => res.status(500).send({ message: `Произошла ошибка ${err}` }));
+    .catch((err) => res.status(500).send({ message: `Произошла ошибка ${err.name} c текстом ${err.message}` }));
 };
 
 module.exports.getUserById = (req, res) => {
   const id = req.params.userId;
   User.findById(id)
-    .orFail(() => IncorrectDate)
+    .orFail(() => new NotFoundError())
     .then((user) => res.send(user))
     .catch((err) => {
-      if (err.name === 'ValidationError') {
-        return res.status(NotFound.statusCode).send({ message: `Пользователь ${id} ${NotFound.message}` });
+      if (err.name === 'NotFoundError') {
+        const NotFound = new NotFoundError(`Пользователь по id ${id} не найден`);
+        return res.status(NotFound.statusCode).send({ message: NotFound.message });
       }
       if (err.name === 'CastError') {
+        const IncorrectDate = new IncorrectDateError('Некорректные данные');
         return res.status(IncorrectDate.statusCode).send({ message: `${IncorrectDate.message} пользователя` });
       }
-      res.status(500).send({ message: `Произошла ошибка ${err}` });
+      return res.status(500).send({ message: `Произошла ошибка ${err.name} c текстом ${err.message}` });
     });
 };
 
@@ -33,9 +32,10 @@ module.exports.createUser = (req, res) => {
     .then((user) => res.send(user))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        return res.status(IncorrectDate.statusCode).send({ message: `${IncorrectDate.message} пользователя` });
+        const IncorrectDate = new IncorrectDateError('Переданы некорректные данные при создании пользователя');
+        return res.status(IncorrectDate.statusCode).send({ message: IncorrectDate.message });
       }
-      return res.status(500).send({ message: `Произошла ошибка ${err}` });
+      return res.status(500).send({ message: `Произошла ошибка ${err.name} c текстом ${err.message}` });
     });
 };
 
@@ -49,13 +49,11 @@ module.exports.updateUserProfile = (req, res) => {
   )
     .then((user) => res.send(user))
     .catch((err) => {
-      if (err.name === 'CastError') {
-        return res.status(NotFound.statusCode).send({ message: `Пользователь ${NotFound.message}` });
-      }
       if (err.name === 'ValidationError') {
-        return res.status(IncorrectDate.statusCode).send({ message: `${IncorrectDate.message} пользователя` });
+        const IncorrectDate = new IncorrectDateError('Переданы некорректные данные при обновлении профиля');
+        return res.status(IncorrectDate.statusCode).send({ message: IncorrectDate.message });
       }
-      res.status(500).send({ message: `Произошла ошибка ${err}` });
+      return res.status(500).send({ message: `Произошла ошибка ${err.name} c текстом ${err.message}` });
     });
 };
 
@@ -69,12 +67,10 @@ module.exports.updateUserAvatar = (req, res) => {
   )
     .then((user) => res.send(user))
     .catch((err) => {
-      if (err.name === 'CastError') {
-        return res.status(NotFound.statusCode).send({ message: `Пользователь ${NotFound.message}` });
-      }
       if (err.name === 'ValidationError') {
-        return res.status(IncorrectDate.statusCode).send({ message: `${IncorrectDate.message} пользователя` });
+        const IncorrectDate = new IncorrectDateError('Переданы некорректные данные при обновлении аватара');
+        return res.status(IncorrectDate.statusCode).send({ message: IncorrectDate.message });
       }
-      res.status(500).send({ message: `Произошла ошибка ${err}` });
+      return res.status(500).send({ message: `Произошла ошибка ${err.name} c текстом ${err.message}` });
     });
 };

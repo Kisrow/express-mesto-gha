@@ -2,13 +2,10 @@ const Card = require('../models/card');
 const { IncorrectDateError } = require('../erorrs/incorrect-date');
 const { NotFoundError } = require('../erorrs/not-found');
 
-const IncorrectDate = new IncorrectDateError('некорректные данные');
-const NotFound = new NotFoundError('не существует');
-
 module.exports.getCards = (req, res) => {
   Card.find({})
     .then((cards) => res.send(cards))
-    .catch((err) => res.status(500).send({ message: `Произошла ошибка ${err}` }));
+    .catch((err) => res.status(500).send({ message: `Произошла ошибка ${err.name} c текстом ${err.message}` }));
 };
 
 module.exports.createCard = (req, res) => {
@@ -18,25 +15,28 @@ module.exports.createCard = (req, res) => {
     .then((card) => res.send(card))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        return res.status(IncorrectDate.statusCode).send({ message: `Ошибка: ${IncorrectDate.message}` });
+        const IncorrectDate = new IncorrectDateError('Переданы некорректные данные при создании карточки');
+        return res.status(IncorrectDate.statusCode).send({ message: `${IncorrectDate.message}` });
       }
-      res.status(500).send({ message: `Произошла ошибка ${err}` });
+      res.status(500).send({ message: `Произошла ошибка ${err.name} c текстом ${err.message}` });
     });
 };
 
 module.exports.deleteCard = (req, res) => {
   const id = req.params.cardId;
   Card.findByIdAndRemove(id)
-    .orFail(() => IncorrectDate)
-    .then((card) => res.send({ message: `${card} - успешно удалена` }))
+    .orFail(() => new NotFoundError())
+    .then(() => res.send({ message: 'карточка успешно удалена' }))
     .catch((err) => {
-      if (err.name === 'ValidationError') {
-        return res.status(NotFound.statusCode).send({ message: `Ошибка: ${NotFound.message}` });
+      if (err.name === 'NotFoundError') {
+        const NotFound = new NotFoundError(`Карточка ${id} не найдена`);
+        return res.status(NotFound.statusCode).send({ message: NotFound.message });
       }
       if (err.name === 'CastError') {
-        return res.status(IncorrectDate.statusCode).send({ message: `Ошибка: ${IncorrectDate.message}` });
+        const IncorrectDate = new IncorrectDateError(`id ${req.params.cardId} указан некорректно`);
+        return res.status(IncorrectDate.statusCode).send({ message: IncorrectDate.message });
       }
-      res.status(500).send({ message: `Произошла ошибка ${err}` });
+      res.status(500).send({ message: `Произошла ошибка ${err.name} c текстом ${err.message}` });
     });
 };
 
@@ -46,16 +46,18 @@ module.exports.likeCard = (req, res) => {
     { $addToSet: { likes: req.user._id } }, // добавить _id в массив, если его там нет
     { new: true },
   )
-    .orFail(() => IncorrectDate)
-    .then((card) => res.send({ message: `лайк успешно поставлен ${card.name}` }))
+    .orFail(() => new NotFoundError())
+    .then(() => res.send({ message: 'лайк успешно поставлен' }))
     .catch((err) => {
-      if (err.name === 'ValidationError') {
-        return res.status(NotFound.statusCode).send({ message: `Ошибка: ${NotFound.message}` });
+      if (err.name === 'NotFoundError') {
+        const NotFound = new NotFoundError(`карточки с id ${req.params.cardId} не существует`);
+        return res.status(NotFound.statusCode).send({ message: NotFound.message });
       }
       if (err.name === 'CastError') {
-        return res.status(IncorrectDate.statusCode).send({ message: `Ошибка: ${IncorrectDate.message}` });
+        const IncorrectDate = new IncorrectDateError('Переданы некорректные данные при постановки лайка');
+        return res.status(IncorrectDate.statusCode).send({ message: IncorrectDate.message });
       }
-      res.status(500).send({ message: `Произошла ошибка ${err}` });
+      res.status(500).send({ message: `Произошла ошибка ${err.name} c текстом ${err.message}` });
     });
 };
 
@@ -65,15 +67,17 @@ module.exports.dislikeCard = (req, res) => {
     { $pull: { likes: req.user._id } }, // убрать _id из массива
     { new: true },
   )
-    .orFail(() => IncorrectDate)
-    .then((card) => res.send({ message: `лайк успешно удален карточке ${card.name}` }))
+    .orFail(() => new NotFoundError())
+    .then(() => res.send({ message: 'лайк успешно удален' }))
     .catch((err) => {
-      if (err.name === 'ValidationError') {
-        return res.status(NotFound.statusCode).send({ message: `Ошибка: ${NotFound.message}` });
+      if (err.name === 'NotFoundError') {
+        const NotFound = new NotFoundError(`карточки с id ${req.params.cardId} не существует`);
+        return res.status(NotFound.statusCode).send({ message: NotFound.message });
       }
       if (err.name === 'CastError') {
-        return res.status(IncorrectDate.statusCode).send({ message: `Ошибка: ${IncorrectDate.message}` });
+        const IncorrectDate = new IncorrectDateError('Переданы некорректные данные при снятии лайка');
+        return res.status(IncorrectDate.statusCode).send({ message: IncorrectDate.message });
       }
-      res.status(500).send({ message: `Произошла ошибка ${err}` });
+      res.status(500).send({ message: `Произошла ошибка ${err.name} c текстом ${err.message}` });
     });
 };

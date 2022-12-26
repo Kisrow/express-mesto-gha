@@ -1,7 +1,8 @@
 class NotFoundError extends Error {
   constructor(message) {
     super(message);
-    this.name = 'CastError';
+    // this.name = 'CastError';
+    this.name = 'NotFoundError';
     this.statusCode = 404;
   }
 }
