@@ -1,11 +1,12 @@
 const User = require('../models/user');
 const { IncorrectDateError } = require('../erorrs/incorrect-date');
 const { NotFoundError } = require('../erorrs/not-found');
+const { ERROR_CODE_DEFAULT } = require('../constants');
 
 module.exports.getUsers = (req, res) => {
   User.find({})
     .then((users) => res.send(users))
-    .catch((err) => res.status(500).send({ message: `Произошла ошибка ${err.name} c текстом ${err.message}` }));
+    .catch((err) => res.status(ERROR_CODE_DEFAULT).send({ message: `Произошла ошибка ${err.name} c текстом ${err.message}` }));
 };
 
 module.exports.getUserById = (req, res) => {
@@ -22,7 +23,7 @@ module.exports.getUserById = (req, res) => {
         const IncorrectDate = new IncorrectDateError('Некорректные данные пользователя');
         return res.status(IncorrectDate.statusCode).send({ message: IncorrectDate.message });
       }
-      return res.status(500).send({ message: `Произошла ошибка ${err.name} c текстом ${err.message}` });
+      return res.status(ERROR_CODE_DEFAULT).send({ message: `Произошла ошибка ${err.name} c текстом ${err.message}` });
     });
 };
 
@@ -35,7 +36,7 @@ module.exports.createUser = (req, res) => {
         const IncorrectDate = new IncorrectDateError('Переданы некорректные данные при создании пользователя');
         return res.status(IncorrectDate.statusCode).send({ message: IncorrectDate.message });
       }
-      return res.status(500).send({ message: `Произошла ошибка ${err.name} c текстом ${err.message}` });
+      return res.status(ERROR_CODE_DEFAULT).send({ message: `Произошла ошибка ${err.name} c текстом ${err.message}` });
     });
 };
 
@@ -53,7 +54,7 @@ module.exports.updateUserProfile = (req, res) => {
         const IncorrectDate = new IncorrectDateError('Переданы некорректные данные при обновлении профиля');
         return res.status(IncorrectDate.statusCode).send({ message: IncorrectDate.message });
       }
-      return res.status(500).send({ message: `Произошла ошибка ${err.name} c текстом ${err.message}` });
+      return res.status(ERROR_CODE_DEFAULT).send({ message: `Произошла ошибка ${err.name} c текстом ${err.message}` });
     });
 };
 
@@ -71,6 +72,6 @@ module.exports.updateUserAvatar = (req, res) => {
         const IncorrectDate = new IncorrectDateError('Переданы некорректные данные при обновлении аватара');
         return res.status(IncorrectDate.statusCode).send({ message: IncorrectDate.message });
       }
-      return res.status(500).send({ message: `Произошла ошибка ${err.name} c текстом ${err.message}` });
+      return res.status(ERROR_CODE_DEFAULT).send({ message: `Произошла ошибка ${err.name} c текстом ${err.message}` });
     });
 };

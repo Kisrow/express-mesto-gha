@@ -1,11 +1,12 @@
 const Card = require('../models/card');
 const { IncorrectDateError } = require('../erorrs/incorrect-date');
 const { NotFoundError } = require('../erorrs/not-found');
+const { ERROR_CODE_DEFAULT } = require('../constants');
 
 module.exports.getCards = (req, res) => {
   Card.find({})
     .then((cards) => res.send(cards))
-    .catch((err) => res.status(500).send({ message: `Произошла ошибка ${err.name} c текстом ${err.message}` }));
+    .catch((err) => res.status(ERROR_CODE_DEFAULT).send({ message: `Произошла ошибка ${err.name} c текстом ${err.message}` }));
 };
 
 module.exports.createCard = (req, res) => {
@@ -18,7 +19,7 @@ module.exports.createCard = (req, res) => {
         const IncorrectDate = new IncorrectDateError('Переданы некорректные данные при создании карточки');
         return res.status(IncorrectDate.statusCode).send({ message: `${IncorrectDate.message}` });
       }
-      res.status(500).send({ message: `Произошла ошибка ${err.name} c текстом ${err.message}` });
+      res.status(ERROR_CODE_DEFAULT).send({ message: `Произошла ошибка ${err.name} c текстом ${err.message}` });
     });
 };
 
@@ -36,7 +37,7 @@ module.exports.deleteCard = (req, res) => {
         const IncorrectDate = new IncorrectDateError(`id ${req.params.cardId} указан некорректно`);
         return res.status(IncorrectDate.statusCode).send({ message: IncorrectDate.message });
       }
-      res.status(500).send({ message: `Произошла ошибка ${err.name} c текстом ${err.message}` });
+      res.status(ERROR_CODE_DEFAULT).send({ message: `Произошла ошибка ${err.name} c текстом ${err.message}` });
     });
 };
 
@@ -57,7 +58,7 @@ module.exports.likeCard = (req, res) => {
         const IncorrectDate = new IncorrectDateError('Переданы некорректные данные при постановки лайка');
         return res.status(IncorrectDate.statusCode).send({ message: IncorrectDate.message });
       }
-      res.status(500).send({ message: `Произошла ошибка ${err.name} c текстом ${err.message}` });
+      res.status(ERROR_CODE_DEFAULT).send({ message: `Произошла ошибка ${err.name} c текстом ${err.message}` });
     });
 };
 
@@ -78,6 +79,6 @@ module.exports.dislikeCard = (req, res) => {
         const IncorrectDate = new IncorrectDateError('Переданы некорректные данные при снятии лайка');
         return res.status(IncorrectDate.statusCode).send({ message: IncorrectDate.message });
       }
-      res.status(500).send({ message: `Произошла ошибка ${err.name} c текстом ${err.message}` });
+      res.status(ERROR_CODE_DEFAULT).send({ message: `Произошла ошибка ${err.name} c текстом ${err.message}` });
     });
 };
