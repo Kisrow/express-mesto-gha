@@ -26,12 +26,11 @@ module.exports.createCard = (req, res) => {
 module.exports.deleteCard = (req, res) => {
   const id = req.params.cardId;
   Card.findByIdAndRemove(id)
-    .orFail(() => new NotFoundError())
+    .orFail(() => new NotFoundError(`Карточка ${id} не найдена`))
     .then(() => res.send({ message: 'карточка успешно удалена' }))
     .catch((err) => {
       if (err.name === 'NotFoundError') {
-        const NotFound = new NotFoundError(`Карточка ${id} не найдена`);
-        return res.status(NotFound.statusCode).send({ message: NotFound.message });
+        return res.status(err.statusCode).send({ message: err.message });
       }
       if (err.name === 'CastError') {
         const IncorrectDate = new IncorrectDateError(`id ${req.params.cardId} указан некорректно`);
@@ -47,12 +46,11 @@ module.exports.likeCard = (req, res) => {
     { $addToSet: { likes: req.user._id } }, // добавить _id в массив, если его там нет
     { new: true },
   )
-    .orFail(() => new NotFoundError())
+    .orFail(() => new NotFoundError(`карточки с id ${req.params.cardId} не существует`))
     .then(() => res.send({ message: 'лайк успешно поставлен' }))
     .catch((err) => {
       if (err.name === 'NotFoundError') {
-        const NotFound = new NotFoundError(`карточки с id ${req.params.cardId} не существует`);
-        return res.status(NotFound.statusCode).send({ message: NotFound.message });
+        return res.status(err.statusCode).send({ message: err.message });
       }
       if (err.name === 'CastError') {
         const IncorrectDate = new IncorrectDateError('Переданы некорректные данные при постановки лайка');
@@ -68,12 +66,11 @@ module.exports.dislikeCard = (req, res) => {
     { $pull: { likes: req.user._id } }, // убрать _id из массива
     { new: true },
   )
-    .orFail(() => new NotFoundError())
+    .orFail(() => new NotFoundError(`карточки с id ${req.params.cardId} не существует`))
     .then(() => res.send({ message: 'лайк успешно удален' }))
     .catch((err) => {
       if (err.name === 'NotFoundError') {
-        const NotFound = new NotFoundError(`карточки с id ${req.params.cardId} не существует`);
-        return res.status(NotFound.statusCode).send({ message: NotFound.message });
+        return res.status(err.statusCode).send({ message: err.message });
       }
       if (err.name === 'CastError') {
         const IncorrectDate = new IncorrectDateError('Переданы некорректные данные при снятии лайка');

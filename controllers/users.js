@@ -12,12 +12,11 @@ module.exports.getUsers = (req, res) => {
 module.exports.getUserById = (req, res) => {
   const id = req.params.userId;
   User.findById(id)
-    .orFail(() => new NotFoundError())
+    .orFail(() => new NotFoundError(`Пользователь по id ${id} не найден`))
     .then((user) => res.send(user))
     .catch((err) => {
       if (err.name === 'NotFoundError') {
-        const NotFound = new NotFoundError(`Пользователь по id ${id} не найден`);
-        return res.status(NotFound.statusCode).send({ message: NotFound.message });
+        return res.status(err.statusCode).send({ message: err.message });
       }
       if (err.name === 'CastError') {
         const IncorrectDate = new IncorrectDateError('Некорректные данные пользователя');
@@ -48,11 +47,15 @@ module.exports.updateUserProfile = (req, res) => {
     { name, about },
     { new: true, runValidators: true },
   )
+    .orFail(() => new NotFoundError(`Пользователь ${id} не найден`))
     .then((user) => res.send(user))
     .catch((err) => {
       if (err.name === 'ValidationError') {
         const IncorrectDate = new IncorrectDateError('Переданы некорректные данные при обновлении профиля');
         return res.status(IncorrectDate.statusCode).send({ message: IncorrectDate.message });
+      }
+      if (err.name === 'NotFoundError') {
+        return res.status(err.statusCode).send({ message: err.message });
       }
       return res.status(ERROR_CODE_DEFAULT).send({ message: `Произошла ошибка ${err.name} c текстом ${err.message}` });
     });
@@ -66,11 +69,15 @@ module.exports.updateUserAvatar = (req, res) => {
     { avatar },
     { new: true, runValidators: true },
   )
+    .orFail(() => new NotFoundError(`Пользователь ${id} не найден`))
     .then((user) => res.send(user))
     .catch((err) => {
       if (err.name === 'ValidationError') {
         const IncorrectDate = new IncorrectDateError('Переданы некорректные данные при обновлении аватара');
         return res.status(IncorrectDate.statusCode).send({ message: IncorrectDate.message });
+      }
+      if (err.name === 'NotFoundError') {
+        return res.status(err.statusCode).send({ message: err.message });
       }
       return res.status(ERROR_CODE_DEFAULT).send({ message: `Произошла ошибка ${err.name} c текстом ${err.message}` });
     });
