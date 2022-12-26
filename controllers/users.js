@@ -19,8 +19,8 @@ module.exports.getUserById = (req, res) => {
         return res.status(NotFound.statusCode).send({ message: NotFound.message });
       }
       if (err.name === 'CastError') {
-        const IncorrectDate = new IncorrectDateError('Некорректные данные');
-        return res.status(IncorrectDate.statusCode).send({ message: `${IncorrectDate.message} пользователя` });
+        const IncorrectDate = new IncorrectDateError('Некорректные данные пользователя');
+        return res.status(IncorrectDate.statusCode).send({ message: IncorrectDate.message });
       }
       return res.status(500).send({ message: `Произошла ошибка ${err.name} c текстом ${err.message}` });
     });
