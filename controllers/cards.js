@@ -1,13 +1,12 @@
 const Card = require('../models/card');
 const { IncorrectDateError } = require('../erorrs/incorrect-date');
 const { NotFoundError } = require('../erorrs/not-found');
-const { ERROR_CODE_DEFAULT } = require('../constants');
 const { NotPermissionError } = require('../erorrs/not-permission');
 
-module.exports.getCards = (req, res) => {
+module.exports.getCards = (req, res, next) => {
   Card.find({})
     .then((cards) => res.send(cards))
-    .catch((err) => res.status(ERROR_CODE_DEFAULT).send({ message: `Произошла ошибка ${err.name} c текстом ${err.message}` }));
+    .catch(next);
 };
 
 module.exports.createCard = (req, res, next) => {
