@@ -6,7 +6,6 @@ module.exports = (req, res, next) => {
 
   if (!authorization || !authorization.startsWith('Bearer ')) {
     next(new IncorrectAuthError('Необходима авторизация'));
-    // return res.status(ERROR_CODE_INCORRECT_DATE).send({ message: 'Необходима авторизация' });
   }
 
   const token = authorization.replace('Bearer ', '');
@@ -16,7 +15,6 @@ module.exports = (req, res, next) => {
     payload = jwt.verify(token, 'some-secret-key');
   } catch (err) {
     next(new IncorrectAuthError('Необходима авторизация'));
-    // return res.status(ERROR_CODE_INCORRECT_DATE).send({ message: 'Необходима авторизация' });
   }
 
   req.user = payload;

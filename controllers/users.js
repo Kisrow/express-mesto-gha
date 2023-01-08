@@ -102,8 +102,6 @@ module.exports.updateUserAvatar = (req, res, next) => {
     });
 };
 
-//! надо записывать JWT в httpOnly куку,
-//! При неправильных почте и пароле контроллер должен вернуть ошибку 401
 module.exports.login = (req, res, next) => {
   const { email, password } = req.body;
   User.findUserByCredentials(email, password)
