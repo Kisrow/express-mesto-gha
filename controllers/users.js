@@ -3,7 +3,6 @@ const jwt = require('jsonwebtoken');
 const User = require('../models/user');
 const { IncorrectDateError } = require('../erorrs/incorrect-date');
 const { NotFoundError } = require('../erorrs/not-found');
-const { ERROR_CODE_DEFAULT } = require('../constants');
 const { IncorrectEmailError } = require('../erorrs/incorret-email');
 
 module.exports.getUsers = (req, res, next) => {
@@ -121,14 +120,9 @@ module.exports.login = (req, res, next) => {
     .catch(next);
 };
 
-module.exports.getAuthorizedUser = (req, res) => {
+module.exports.getAuthorizedUser = (req, res, next) => {
   User.findById(req.user._id)
-    .orFail(() => new NotFoundError('Пользователь не найден'))
+    .orFail(() => next(new NotFoundError('Пользователь не найден')))
     .then((user) => res.send(user))
-    .catch((err) => {
-      if (err.name === 'NotFoundError') {
-        return res.status(err.statusCode).send({ message: err.message });
-      }
-      return res.status(ERROR_CODE_DEFAULT).send({ message: `Произошла ошибка ${err.name} c текстом ${err.message}` });
-    });
+    .catch(next);
 };
